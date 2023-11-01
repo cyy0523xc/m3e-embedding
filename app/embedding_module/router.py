@@ -32,12 +32,14 @@ else:
 models = {
     MODEL_DEFAULT: SentenceTransformer(MODEL_CONFIG[MODEL_DEFAULT].as_posix(), device=device)
 }
-print("加载默认模型成功.")
+print(f"加载默认模型成功: {MODEL_DEFAULT.value}")
 
 
 @router.post("/", summary='Embedding', response_model=EmbeddingResponse)
 async def api_embedding(request: EmbeddingRequest):
-    """批量文本Embedding接口"""
+    """批量文本Embedding接口\n
+    输入文本列表，输出每个文本对应的Embedding（向量）
+    """
     # 转向量
     model = models[request.model]
     embeddings = [model.encode(text) for text in request.texts]

@@ -19,4 +19,4 @@ services:
             - driver: nvidia
               device_ids: ["1"]
               capabilities: [ gpu ]
-    command: uvicorn main:app -h 0.0.0.0 --reload
+    command: uvicorn main:app --host 0.0.0.0 --reload
