@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  ocr-1:
+    image: m3e:u1804-cu102-py38-v1
+    container_name: ibbd-m3e-embedding
+    runtime: nvidia
+    restart: always
+    ports:
+      - "20971:8000"
+    volumes:
+      - ./app:/app
+      - /data2/models/m3e-large/:/app/files/models/m3e-large/
+    working_dir: /app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["1"]
+              capabilities: [ gpu ]
+    command: uvicorn main:app -h 0.0.0.0 --reload

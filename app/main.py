@@ -10,8 +10,6 @@ import time
 from fastapi import Request
 from settings import DEBUG
 from utils import parse_readme
-from schema import VersionResp
-from exceptions import status, InternalException
 from init_app import init_app
 
 # 初始化app

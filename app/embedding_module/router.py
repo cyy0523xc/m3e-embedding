@@ -30,8 +30,9 @@ else:
 
 # 加载模型
 models = {
-    MODEL_DEFAULT: SentenceTransformer(MODEL_CONFIG[MODEL_DEFAULT], device=device)
+    MODEL_DEFAULT: SentenceTransformer(MODEL_CONFIG[MODEL_DEFAULT].as_posix(), device=device)
 }
+print("加载默认模型成功.")
 
 
 @router.post("/", summary='Embedding', response_model=EmbeddingResponse)

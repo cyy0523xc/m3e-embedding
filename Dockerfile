@@ -7,11 +7,12 @@ LABEL maintainer "Alex Cai <cyy0523xc@qq.com>"
 # 安装Python3.8, pip, git等
 # 参考：https://cloud.tencent.com/developer/article/1626765
 # wget https://bootstrap.pypa.io/get-pip.py 直接下载经常超时
+#   可以使用阿里的源替代：http://mirrors.aliyun.com/pypi/get-pip.py
 # 可能会报错：GPG error: https://developer.download.nvidia.cn/..... NO_PUBKEY A4B469963BF863CC。
 # 可以直接删除下面的文件：
 #   rm /etc/apt/sources.list.d/cuda.list
 #   rm /etc/apt/sources.list.d/nvidia-ml.list
-COPY get-pip.py /
+# COPY get-pip.py /
 RUN ls /etc/apt/sources.list.d/ \
     && rm -f /etc/apt/sources.list.d/cuda.list \
     && rm -f /etc/apt/sources.list.d/nvidia-ml.list \
@@ -26,7 +27,9 @@ RUN ls /etc/apt/sources.list.d/ \
         python3.8-distutils \
         libglib2.0-0 libsm6 libxext-dev libxrender1 libgl1-mesa-glx \
     && ln -sf /usr/bin/python3.8 /usr/bin/python3 \
-    && python3 /get-pip.py \
+    && wget http://mirrors.aliyun.com/pypi/get-pip.py \
+    && python3 get-pip.py \
+    && rm get-pip.py \
     && rm -rf /var/lib/apt/lists/*\
     && alias cpip='pip install -i https://mirrors.aliyun.com/pypi/simple/' \
     && pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/
