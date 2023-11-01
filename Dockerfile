@@ -1,33 +1,51 @@
-FROM python:3.8
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
+LABEL maintainer "Alex Cai <cyy0523xc@qq.com>"
 
-LABEL user="alex cai"
-LABEL email="caiyingyao@ibbd.net"
-LABEL version="1.0"
-LABEL description="基于python3.8的FastAPI镜像"
-ENV DEBIAN_FRONTEND noninteractive
-
-RUN apt-get update -y \
+# -----------------------------------------------------------------
+# ----------------------- install python及依赖 --------------------
+# -----------------------------------------------------------------
+# 安装Python3.8, pip, git等
+# 参考：https://cloud.tencent.com/developer/article/1626765
+# opencv依赖：libglib2.0-0, libsm6, libxext-dev
+#        curl \
+#        build-essential \
+# opencv4.4 报错：
+# ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+# 需要安装：libgl1-mesa-glx
+# ethtool, net-tools: 获取硬件信息时依赖
+# wget https://bootstrap.pypa.io/get-pip.py 直接下载经常超时
+# 可能会报错：GPG error: https://developer.download.nvidia.cn/..... NO_PUBKEY A4B469963BF863CC。
+# 可以直接删除下面的文件：
+#   rm /etc/apt/sources.list.d/cuda.list
+#   rm /etc/apt/sources.list.d/nvidia-ml.list
+COPY get-pip.py /
+RUN apt update -y \
+    && apt install -y --no-install-recommends software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa -y \
     && apt-get install -y --no-install-recommends \
         git \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
+        wget \
+        python3.8 \
+        python3.8-dev \
+        python3.8-distutils \
+        libglib2.0-0 libsm6 libxext-dev libxrender1 libgl1-mesa-glx \
+    && ln -sf /usr/bin/python3.8 /usr/bin/python3 \
+    && python3 /get-pip.py \
+    && rm -rf /var/lib/apt/lists/*\
+    && alias cpip='pip install -i https://mirrors.aliyun.com/pypi/simple/' \
+    && pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
-#  国内源
-RUN pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/
-# RUN pip3 config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
-# RUN pip3 config set global.index-url http://pypi.douban.com/simple/
-# RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-
-# install fastapi
+# ------------------------------------------------------------------
+# ----------------------- install python包 -------------------------
+# ------------------------------------------------------------------
 COPY ./requirements.txt /
 RUN pip3 --no-cache-dir install -r /requirements.txt \
     && rm -f /requirements.txt
 
 # 终端设置
-# 默认值是dumb，这时在终端操作时可能会出现：terminal is not fully functional
+# 默认值是dumb，这时在终端操作时可能会出现：
+# terminal is not fully functional
 ENV LANG C.UTF-8
 ENV TERM xterm
 ENV PYTHONIOENCODING utf-8
-
-# 解决时区问题
 ENV TZ "Asia/Shanghai"

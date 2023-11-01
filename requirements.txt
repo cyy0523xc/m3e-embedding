@@ -1,7 +1,15 @@
-requests
 fastapi
+pydantic
 uvicorn
-python-multipart
-# FileResponse依赖
 aiofiles
 loguru
+python-multipart
+
+numpy
+scipy
+scikit-learn
+torch
+torchvision
+torchaudio
+tiktoken
+sentence-transformers
