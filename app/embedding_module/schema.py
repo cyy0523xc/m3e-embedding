@@ -11,12 +11,25 @@ from settings import ModelType, MODEL_DEFAULT
 
 class EmbeddingRequest(BaseModel):
     """Embedding请求参数 """
-    texts: List[str] = Field(..., min_items=1, max_items=100,
-                             title='需要进行Embedding的文本列表', description='注意文本的长度应该要符合模型的输入限制')
+    text: str = Field(..., min_length=1, title='需要进行Embedding的文本',
+                      description='注意文本的长度应该要符合模型的输入限制')
     model: ModelType = Field(MODEL_DEFAULT, title='Embedding模型')
 
 
 class EmbeddingResponse(BaseModel):
     """Embedding响应参数 """
+    embedding: List[float] = Field(..., title='Embedding值', description='输入文本的Embedding值')
+
+
+
+class EmbeddingBatchRequest(BaseModel):
+    """批量Embedding请求参数 """
+    texts: List[str] = Field(..., min_items=1, max_items=100, title='需要进行Embedding的文本列表',
+                             description='注意文本的长度应该要符合模型的输入限制')
+    model: ModelType = Field(MODEL_DEFAULT, title='Embedding模型')
+
+
+class EmbeddingBatchResponse(BaseModel):
+    """批量Embedding响应参数 """
     embeddings: List[List[float]] = Field(..., min_items=1, max_items=100,
                                           title='Embedding列表', description='和输入参数中的texts对应')

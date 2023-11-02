@@ -15,6 +15,7 @@ from sentence_transformers import SentenceTransformer
 
 from settings import MODEL_CONFIG, MODEL_DEFAULT
 from .schema import EmbeddingRequest, EmbeddingResponse
+from .schema import EmbeddingBatchRequest, EmbeddingBatchResponse
 
 router = APIRouter(
     # dependencies=[Depends(get_token_header)],
@@ -35,27 +36,49 @@ models = {
 print(f"加载默认模型成功: {MODEL_DEFAULT.value}")
 
 
-@router.post("/", summary='Embedding', response_model=EmbeddingResponse)
+@router.post("/", summary='文本Embedding接口', response_model=EmbeddingResponse)
 async def api_embedding(request: EmbeddingRequest):
+    """文本Embedding接口\n
+    输入文本，输出文本对应的Embedding（向量）
+    """
+    model = models[request.model]
+    embedding = _parse_text(model, request.text)
+    return {
+        'embedding': embedding,
+    }
+
+
+@router.post("/batch", summary='批量文本Embedding接口', response_model=EmbeddingBatchResponse)
+async def api_embedding_batch(request: EmbeddingBatchRequest):
     """批量文本Embedding接口\n
     输入文本列表，输出每个文本对应的Embedding（向量）
     """
-    # 转向量
     model = models[request.model]
-    embeddings = [model.encode(text) for text in request.texts]
-
-    # 如果嵌入向量的维度不为1536，则使用特征扩展法扩展至1536维度
-    # # embeddings = [_interpolate_vector(embedding, 1536) if len(embedding) < 1536 else embedding for embedding in embeddings]
-    embeddings = [_expand_features(embedding, 1536) if len(embedding) < 1536 else embedding for embedding in embeddings]
-
-    # Min-Max normalization
-    embeddings = [embedding / np.linalg.norm(embedding) for embedding in embeddings]
-
-    # 将numpy数组转换为列表
-    embeddings = [embedding.tolist() for embedding in embeddings]
+    embeddings = [_parse_text(model, text) for text in request.texts]
     return {
         'embeddings': embeddings,
     }
+
+
+def _parse_text(model, text: str) -> List[float]:
+    """将一个文本装成Embedding
+    Args:
+        text (str): 输入文本
+    Returns:
+        List[float]: Embedding
+    """
+    # 转向量
+    embedding = model.encode(text)
+
+    # 如果嵌入向量的维度不为1536，则使用特征扩展法扩展至1536维度
+    # # embeddings = [_interpolate_vector(embedding, 1536) if len(embedding) < 1536 else embedding for embedding in embeddings]
+    embedding = _expand_features(embedding, 1536) if len(embedding) < 1536 else embedding
+
+    # Min-Max normalization
+    embedding = embedding / np.linalg.norm(embedding)
+
+    # 将numpy数组转换为列表
+    return embedding.tolist()
 
 
 def _interpolate_vector(vector: List[float], target_length: int) -> List[float]:
