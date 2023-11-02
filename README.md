@@ -2,11 +2,13 @@
 
 本项目使用[`fastapi-start`](https://github.com/ibbd-dev/fastapi-start)工具进行初始化，该工具的帮助可以使用命令：`fas --help`。
 
+用于快速将`m3e-base`（还没测试过）和`m3e-large`（已完成测试）的Embedding模型启动为http接口，基于流行的fastapi框架进行开发。
+
 ## 1. 功能介绍
 
 ## 2. 安装与部署
 
-部署前需要先复制配置文件：
+### 2.1 部署前需要先复制配置文件
 
 ```sh
 cd app/
@@ -18,6 +20,18 @@ vim settings.py
 # 启动
 # FastAPI文档：https://fastapi.tiangolo.com/
 uvicorn main:app --reload
+```
+
+### 2.2 使用docker-compose启动
+
+```sh
+# 如果需要可以修改该配置
+# 特别是模型目录：/app/files/models/m3e-large/，需要将外部的模型目录挂载进来
+# 如果需要改目录，也可以在配置文件settings.py中进行修改
+cp docker-compose-example.yml docker-compose.yml
+
+# 启动
+docker-compose up -d
 ```
 
 ## 3. fas工具使用说明
